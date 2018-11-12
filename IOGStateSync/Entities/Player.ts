@@ -46,7 +46,7 @@ export class Player extends Entity {
      */
     destroy(){
         super.destroy();
-        delete this.room.state.players[this.sessionId];
+        this.room.players.delete(this.sessionId);
     }
 
 }

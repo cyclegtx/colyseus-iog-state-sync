@@ -48,7 +48,21 @@ export class GameRoom extends Room<GameState> {
      */
     mapBorder: number = 50;
 
+    /**
+     *状态
+     *
+     * @type {GameState}
+     * @memberof GameRoom
+     */
     state: GameState = null;
+
+    /**
+     *玩家类索引
+     *
+     * @type {Map<string,Player>}
+     * @memberof GameRoom
+     */
+    players:Map<string,Player> = new Map();
 
 
     // Authorize client based on provided options before WebSocket handshake is complete
@@ -114,7 +128,7 @@ export class GameRoom extends Room<GameState> {
      * @memberof IOGStateSyncRoom
      */
     onCMD(client, CMD, value) {
-        let player:Player = this.state.players[client.sessionId];
+        let player:Player = this.players.get(client.sessionId);
         if (player) {
             player.onCMD(CMD, value);
         }
@@ -170,7 +184,7 @@ export class GameRoom extends Room<GameState> {
     addPlayer(sessionId: string) {
         let playerEntity = new TestPlayer(this, "Player_" + Math.random());
         playerEntity.sessionId = sessionId;
-        this.state.players[sessionId] = playerEntity;
+        this.players.set(sessionId,playerEntity);
         this.addEntity(playerEntity);
     }
 
@@ -182,7 +196,7 @@ export class GameRoom extends Room<GameState> {
      * @memberof IOGStateSyncRoom
      */
     removePlayer(sessionId: string) {
-        let player:Player = this.state.players[sessionId];
+        let player:Player = this.players.get(sessionId);
         if (player) {
             player.destroy();
         }
