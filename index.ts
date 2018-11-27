@@ -6,7 +6,9 @@ import { Server } from 'colyseus';
 import { monitor } from '@colyseus/monitor';
 
 // Import demo room handlers
-import { TestGameRoom } from "./IOGStateSync/TestGameRoom";
+import { GameRoom as ExampleRoom } from "./Games/Example/GameRoom";
+import { GameRoom as ExampleBodiesRoom } from './Games/ExampleBodies/GameRoom';
+import { GameRoom as BattleGroundRoom } from './Games/BattleGround/GameRoom';
 
 
 const port = Number(process.env.PORT || 2567);
@@ -17,9 +19,10 @@ const gameServer = new Server({
   server: createServer(app)
 });
 
-gameServer.register("room",TestGameRoom);
+gameServer.register("ExampleRoom", ExampleRoom);
 
-
+gameServer.register("ExampleBodiesRoom", ExampleBodiesRoom);
+gameServer.register("BattleGroundRoom", BattleGroundRoom);
 
 app.use('/', express.static(path.join(__dirname, "static")));
 app.use('/', serveIndex(path.join(__dirname, "static"), {'icons': true}))

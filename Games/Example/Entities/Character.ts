@@ -1,10 +1,10 @@
-import { RectBodyEntity } from "./RectBodyEntity";
+import { RectBodyEntity } from "../../../IOGStateSync/Entities/RectBodyEntity";
 import { Vector, Body} from "matter-js";
-import { GameRoom } from "../GameRoom";
 import { nosync } from "colyseus";
-import { PhysicsEntity } from "./PhysicsEntity";
+import { PhysicsEntity } from "../../../IOGStateSync/Entities/PhysicsEntity";
 import { Crate } from "./Crate";
-import { TestPlayer } from "./TestPlayer";
+import { Player } from "./Player";
+import { GameRoom } from "../../../IOGStateSync/GameRoom";
 
 
 
@@ -33,7 +33,7 @@ export class Character extends RectBodyEntity {
     speed: number = 1;
 
     @nosync
-    owner: TestPlayer = null;
+    owner: Player = null;
 
     score: number = 0;
     name: string = "";
@@ -41,7 +41,7 @@ export class Character extends RectBodyEntity {
 
     constructor(
         room:GameRoom,
-        owner:TestPlayer,
+        owner:Player,
         x: number,
         y:number,
     ) {
@@ -156,12 +156,11 @@ export class Character extends RectBodyEntity {
         this.dirY = _dir.y;
     }
 
-    onCollisionStart(entityA: PhysicsEntity, entityB: PhysicsEntity) {
-        super.onCollisionStart(entityA, entityB);
-        let crate: Crate = entityA instanceof Crate ? entityA : (entityB instanceof Crate ? entityB : null);
-        if (crate != null) {
+    onCollisionStart(other: PhysicsEntity, self: PhysicsEntity) {
+        super.onCollisionStart(other, self);
+        if (other instanceof Crate) {
             if (this.entityInHand == null) {
-                crate.getByCharacter(this);
+                other.getByCharacter(this);
             }
         }
     }

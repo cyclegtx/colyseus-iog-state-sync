@@ -1,9 +1,11 @@
-import { GameRoom } from "./GameRoom";
+import { GameRoom as BaseGameRoom } from "../../IOGStateSync/GameRoom";
+import { Entity } from "../../IOGStateSync/Entities/Entity";
 import { Crate } from "./Entities/Crate";
-import { Entity } from "./Entities/Entity";
 import { AIPlayer } from "./Entities/AIPlayer";
+import { Player } from "./Entities/Player";
+import { Client } from "colyseus";
 
-export class TestGameRoom extends GameRoom {
+export class GameRoom extends BaseGameRoom {
     public bots: Entity[] = [];
 
     // When room is initialized
@@ -14,7 +16,6 @@ export class TestGameRoom extends GameRoom {
         this.engine.world.gravity.scale = 0;
         this.createPickableEntites();
         this.createBots();
-
         this.clock.setInterval(this.checkPickableCount.bind(this),5000);
     }
 
@@ -48,6 +49,18 @@ export class TestGameRoom extends GameRoom {
             }
         }
         
+    }
+
+    addPlayer(client:Client, playername: string) {
+        let playerEntity = new Player(this, playername, client);
+        playerEntity.client = client;
+        this.players.set(client.sessionId, playerEntity);
+        this.addEntity(playerEntity);
+    }
+    
+    onJoin(client: Client) {
+        super.onJoin(client);
+        this.addPlayer(client,"TestPlayer1");
     }
     
 }

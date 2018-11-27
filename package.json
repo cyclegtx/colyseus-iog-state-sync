@@ -17,17 +17,17 @@
   "dependencies": {
     "@colyseus/monitor": "^0.1.7",
     "@types/matter-js": "^0.10.2",
-    "colyseus": "^0.9.15",
-    "colyseus.js": "^0.9.6",
+    "browserify": "^16.2.3",
+    "colyseus": "^0.9.19",
+    "colyseus.js": "^0.9.15",
     "express": "^4.14.0",
     "matter-js": "^0.14.2",
-    "nodemon": "^1.11.0",
+    "nodemon": "^1.18.6",
     "serve-index": "^1.8.0",
     "shortid": "^2.2.14",
     "superagent": "^3.8.1"
   },
   "devDependencies": {
-    "browserify": "^14.4.0",
     "ts-node": "^5.0.1",
     "typescript": "^2.7.2"
   }

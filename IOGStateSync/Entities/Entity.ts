@@ -1,19 +1,32 @@
 import shortid = require("shortid");
 import { nosync } from "colyseus";
 import { GameRoom } from "../GameRoom";
+import { debug,debugsync } from "../DebugSetting";
 
 export class Entity {
-    @nosync
-    public room: GameRoom = null;
 
-    public id:string = null;
-    public angle: number = 0;
-    public action: string = "";
-    public type: string = "";
-    public x: number = 0;
-    public y: number = 0;
-    public width: number = 0;
-    public height: number = 0;
+    @nosync
+    room: GameRoom = null;
+
+    @nosync
+    id:string = null;
+
+    angle: number = 0;
+    action: string = "";
+    type: string = "";
+    x: number = 0;
+    y: number = 0;
+    
+    @debugsync
+    width: number = 0;
+
+    @debugsync
+    height: number = 0;
+
+    @debugsync
+    debug:boolean = debug;
+
+    scale: number = 1;
 
 
     constructor(
@@ -42,7 +55,6 @@ export class Entity {
         delete this.room.state.entities[this.id];
     }
 
-    update(dt:number):void{
-    }
+    update(dt:number):void{}
 
 }

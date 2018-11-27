@@ -4,11 +4,10 @@ import { Engine, Vector, Events } from "matter-js";
 import { Entity } from "./Entities/Entity";
 import { Wall } from "./Entities/Wall";
 import { Player } from "./Entities/Player";
-import { TestPlayer } from "./Entities/TestPlayer";
 import { PhysicsEntity } from "./Entities/PhysicsEntity";
 
-
 export class GameRoom extends Room<GameState> {
+
     /**
      *房间最多人数
      *
@@ -82,6 +81,7 @@ export class GameRoom extends Room<GameState> {
         Events.on(this.engine, "collisionEnd", this.onCollisionStart.bind(this));
 
         this.setSimulationInterval(this.update.bind(this));
+        this.clock.setInterval(this.broadcastAllEntityIds.bind(this), 3000);
     }
 
     update() {
@@ -91,6 +91,20 @@ export class GameRoom extends Room<GameState> {
         Engine.update(this.engine, this.clock.deltaTime);
     }
 
+
+    /**
+     *广播所有entities的id，供客户端同步，以避免丢包造成的数据不同步
+     *
+     * @memberof GameRoom
+     */
+    broadcastAllEntityIds() {
+        let ids = [];
+        for (let i in this.state.entities) {
+            ids.push(i)
+        }
+        this.broadcast(["eids", ids]);
+    }
+
     // Checks if a new client is allowed to join. (default: `return true`)
     requestJoin (options: any, isNew: boolean) {
         return true;
@@ -98,9 +112,7 @@ export class GameRoom extends Room<GameState> {
 
 
     // When client successfully join the room
-    onJoin (client: Client) {
-        this.addPlayer(client.sessionId);
-    }
+    onJoin (client: Client) {}
 
     // When a client leaves the room
     onLeave (client: Client, consented: boolean) { 
@@ -127,7 +139,21 @@ export class GameRoom extends Room<GameState> {
      * @param {*} value
      * @memberof IOGStateSyncRoom
      */
-    onCMD(client, CMD, value) {
+    onCMD(client:Client, CMD, value) {
+        if(CMD == "addplayer"){
+            let nameExisted:boolean = false;
+            for(let player of this.players.values()){
+                if(player.name == value.name){
+                    nameExisted = true;
+                }
+            }
+            if(nameExisted){
+                this.send(client, ["msg", "用户昵称已经存在"]);
+            }else{
+                this.addPlayer(client,value.name);
+            }
+            return;
+        }
         let player:Player = this.players.get(client.sessionId);
         if (player) {
             player.onCMD(CMD, value);
@@ -178,13 +204,13 @@ export class GameRoom extends Room<GameState> {
     /**
      *添加玩家
      *
-     * @param {string} sessionId
-     * @memberof IOGStateSyncRoom
+     * @param {Client} client
+     * @param {string} playername
+     * @memberof GameRoom
      */
-    addPlayer(sessionId: string) {
-        let playerEntity = new TestPlayer(this, "Player_" + Math.random());
-        playerEntity.sessionId = sessionId;
-        this.players.set(sessionId,playerEntity);
+    addPlayer(client: Client,playername:string) {
+        let playerEntity = new Player(this, playername, client);
+        this.players.set(client.sessionId,playerEntity);
         this.addEntity(playerEntity);
     }
 
@@ -226,7 +252,7 @@ export class GameRoom extends Room<GameState> {
             let entityA:PhysicsEntity = this.state.entities[pair.bodyA.entity_id] as PhysicsEntity;
             let entityB:PhysicsEntity = this.state.entities[pair.bodyB.entity_id] as PhysicsEntity;
             if (entityA != undefined && entityB != undefined) {
-                entityA.onCollisionStart(entityA, entityB);
+                entityA.onCollisionStart(entityB, entityA);
                 entityB.onCollisionStart(entityA, entityB);
             }
         }

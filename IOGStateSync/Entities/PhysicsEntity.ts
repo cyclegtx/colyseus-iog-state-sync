@@ -2,14 +2,21 @@ import {Body,  IChamferableBodyDefinition, World, Bodies} from "matter-js";
 import { Entity } from "./Entity";
 import { nosync } from "colyseus";
 import { GameRoom } from "../GameRoom";
+import { debugsync } from "../DebugSetting";
 
 
-export class PhysicsEntity extends Entity {
+export abstract class PhysicsEntity extends Entity {
     @nosync
-    public body:Body = null;
+    body:Body = null;
 
-    public physicsOptions: IChamferableBodyDefinition = {};
-    public physicsEnabled: boolean = true;
+    @debugsync
+    bodyType:string = "rect";
+
+    @debugsync
+    physicsOptions: IChamferableBodyDefinition = {};
+
+    @debugsync
+    physicsEnabled: boolean = true;
 
     constructor(
         room:GameRoom,
@@ -30,10 +37,6 @@ export class PhysicsEntity extends Entity {
         if (this.physicsOptions.isStatic !== true) {
             this.physicsOptions.isStatic = false;
         }
-
-        this.createBody();
-        this.body['entity_id'] = this.id;
-        World.add(this.room.engine.world,this.body);
     }
 
     update(dt:number){
@@ -50,8 +53,22 @@ export class PhysicsEntity extends Entity {
         }
     }
     
-    createBody() {
-        this.body = Bodies.rectangle(this.x, this.y, this.width, this.height, this.physicsOptions);
+    /**
+     *创建Body
+     *
+     * @memberof PhysicsEntity
+     */
+    abstract createBody();
+
+    /**
+     *缩放Entity
+     *
+     * @param {number} scale 缩放倍数
+     * @memberof PhysicsEntity
+     */
+    scaleBody(scale:number){
+        this.scale *= scale;
+        Body.scale(this.body, scale, scale);
     }
 
     /**
@@ -91,19 +108,19 @@ export class PhysicsEntity extends Entity {
     /**
      *当碰撞开始
      *
-     * @param {PhysicsEntity} entityA
-     * @param {PhysicsEntity} entityB
+     * @param {PhysicsEntity} other 产生碰撞的另一个碰撞组件
+     * @param {PhysicsEntity} self 产生碰撞的自身的碰撞组件
      * @memberof PhysicsEntity
      */
-    onCollisionStart(entityA: PhysicsEntity, entityB: PhysicsEntity) {}
+    onCollisionStart(other: PhysicsEntity, self: PhysicsEntity) {}
 
     /**
      *当碰撞结束
      *
-     * @param {PhysicsEntity} entityA
-     * @param {PhysicsEntity} entityB
+     * @param {PhysicsEntity} other 产生碰撞的另一个碰撞组件
+     * @param {PhysicsEntity} self 产生碰撞的自身的碰撞组件
      * @memberof PhysicsEntity
      */
-    onCollisionEnd(entityA: PhysicsEntity, entityB: PhysicsEntity) {}
+    onCollisionEnd(other: PhysicsEntity, self: PhysicsEntity) {}
 
 }

@@ -1,9 +1,9 @@
-import { GameRoom } from "../GameRoom";
-import { Player } from "./Player";
-import { nosync } from "colyseus";
-import { Character } from "./Character";
+import { Player as BasePlayer } from "../../../IOGStateSync/Entities/Player";
+import { nosync, Client } from "colyseus";
+import { Tank } from "./Tank";
+import { GameRoom as BaseGameRoom } from "../../../IOGStateSync/GameRoom";
 
-export class TestPlayer extends Player {
+export class Player extends BasePlayer {
 
     @nosync
     delayOnRespawn: number = 3000;
@@ -12,13 +12,19 @@ export class TestPlayer extends Player {
     respawnCountDown: number = 0;
 
     @nosync
-    character:Character = null;
+    tank:Tank = null;
+
+    tankId:string = null;
+
+    kill:number = 0;
+    death:number = 0;
 
     constructor(
-        room:GameRoom,
-        name:string
+        room: BaseGameRoom,
+        name:string,
+        client:Client,
     ) {
-        super(room,name);
+        super(room, name, client);
         this.respawn();
     }
 
@@ -33,7 +39,9 @@ export class TestPlayer extends Player {
      */
     onCMD(CMD, value) {
         super.onCMD(CMD,value);
-        this.character.onCMD(CMD,value);
+        if(this.tank){
+            this.tank.onCMD(CMD,value);
+        }
     }
 
 
@@ -43,8 +51,6 @@ export class TestPlayer extends Player {
             if (this.respawnCountDown > 0) {
                 this.respawnCountDown -= dt;
             }else{
-                this.character.destroy();
-                this.character = null;
                 this.respawn();
             }
             return;
@@ -53,14 +59,25 @@ export class TestPlayer extends Player {
 
     waitForRespawn(){
         this.action = "waitForRespawn";
+        this.tank.destroy();
+        this.tank = null;
         this.respawnCountDown = this.delayOnRespawn;
     }
 
     respawn(){
         let position = this.room.rndInMap();
-        this.character = new Character(this.room, this, position.x, position.y);
-        this.room.addEntity(this.character);
+        this.tank = new Tank(this.room, this, position.x, position.y);
+        this.room.addEntity(this.tank);
+        this.tankId = this.tank.id;
         this.action = "idle";
+    }
+
+
+    destroy() {
+        super.destroy();
+        if(this.tank){
+            this.tank.destroy()
+        }
     }
 
 }

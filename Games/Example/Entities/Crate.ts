@@ -1,9 +1,9 @@
-import { RectBodyEntity } from "./RectBodyEntity";
+import { RectBodyEntity } from "../../../IOGStateSync/Entities/RectBodyEntity";
 import { Body, Vector } from "matter-js";
-import { GameRoom } from "../GameRoom";
 import { nosync } from "colyseus";
-import { PhysicsEntity } from "./PhysicsEntity";
+import { PhysicsEntity } from "../../../IOGStateSync/Entities/PhysicsEntity";
 import { Character } from "./Character";
+import { GameRoom } from "../GameRoom";
 
 
 export class Crate extends RectBodyEntity {
@@ -90,12 +90,11 @@ export class Crate extends RectBodyEntity {
         }
     }
 
-    onCollisionStart(entityA: PhysicsEntity, entityB: PhysicsEntity): void {
-        super.onCollisionStart(entityA,entityB);
+    onCollisionStart(other: PhysicsEntity, self: PhysicsEntity): void {
+        super.onCollisionStart(other,self);
         if(this.action == "throw"){
-            let character: Character = entityA instanceof Character ? entityA : (entityB instanceof Character ? entityB : null);
-            if(character){
-                character.hurtBy(this.owner);
+            if (other instanceof Character){
+                other.hurtBy(this.owner);
             }
             this.action = "break";
         }

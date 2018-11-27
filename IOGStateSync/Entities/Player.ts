@@ -1,6 +1,6 @@
-import { Vector, Body} from "matter-js";
+import { Vector} from "matter-js";
 import { GameRoom } from "../GameRoom";
-import { nosync } from "colyseus";
+import { nosync, Client } from "colyseus";
 import { Entity } from "./Entity";
 
 
@@ -14,16 +14,23 @@ export class Player extends Entity {
     @nosync
     mousePosition: Vector = Vector.create(0, 1);
 
-    score: number = 0;
     name: string = "";
     sessionId:string = null;
 
+    @nosync
+    client: Client = null;
+
     constructor(
         room:GameRoom,
-        name:string
+        name:string,
+        client:Client,
     ) {
         super(room,"Player",0,0,0,0);
         this.name = name;
+        this.client = client;
+        if(this.client){
+            this.sessionId = this.client.sessionId;
+        }
         this.action = "idle";
     }
 

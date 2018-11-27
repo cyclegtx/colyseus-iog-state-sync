@@ -1,12 +1,12 @@
 import { Vector, Body, Query, Bounds, Vertices, Bodies } from "matter-js";
-import { TestPlayer } from "./TestPlayer";
+import { Player } from "./Player";
 import { nosync } from "colyseus";
-import { GameRoom } from "../GameRoom";
 import { Character } from "./Character";
 import { Crate } from "./Crate";
+import { GameRoom } from "../GameRoom";
 
 
-export class AIPlayer extends TestPlayer {
+export class AIPlayer extends Player {
     @nosync
     AIAction:string = "init";
 
@@ -24,9 +24,9 @@ export class AIPlayer extends TestPlayer {
 
 
     constructor(
-        room:GameRoom
+        room:GameRoom,
     ) {
-        super(room,"BOT_"+Math.random());
+        super(room, "BOT_" + Math.random(), null);
         this.timeSinceLastThink = this.timeBetweenThink*0.5;
     }
 
